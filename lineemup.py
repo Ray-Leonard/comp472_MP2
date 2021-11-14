@@ -3,11 +3,6 @@
 import time
 
 
-def get_diagonal(matrix, i0, j0, d):
-    return [matrix[(i0 + i - 1) % len(matrix)][(j0 + d * i - 1) % len(matrix[0])]
-            for i in range(len(matrix))]
-
-
 class Game:
     MINIMAX = 0
     ALPHABETA = 1
@@ -71,9 +66,18 @@ class Game:
             print()
         print()
 
+    # get the possible winning diagonals as a 2d-list for the current game
+    def get_diagonal(self, orientation):
+        diff_size_win = self.n - self.s
+        if orientation == "slash":
+            return [[self.current_state[y - x][x] for x in range(self.n) if 0 <= y - x < self.n] for y in
+                                range(2 * self.n - 1) if self.n - 1 + diff_size_win >= y >= self.n - 1 - diff_size_win]
+        elif orientation == "backslash":
+            return [[self.current_state[y - x][self.n - 1 - x] for x in range(self.n) if 0 <= y - x < self.n] for y in
+                range(2 * self.n - 1) if self.n - 1 + diff_size_win >= y >= self.n - 1 - diff_size_win]
+
     def is_valid(self, px, py):
-        # change 2 to (n-1)
-        if px < 0 or px > 2 or py < 0 or py > 2:
+        if px < 0 or px > self.n-1 or py < 0 or py > self.n-1:
             return False
         elif self.current_state[px][py] != '.':
             return False
@@ -83,31 +87,58 @@ class Game:
     # change evaluation with loop
     def is_end(self):
         # Vertical win
-        for i in range(0, 3):
-            if (self.current_state[0][i] != '.' and
-                    self.current_state[0][i] == self.current_state[1][i] and
-                    self.current_state[1][i] == self.current_state[2][i]):
-                return self.current_state[0][i]
-        # Horizontal win
-        for i in range(0, 3):
-            if (self.current_state[i] == ['X', 'X', 'X']):
+        for i in range(0, self.n):
+            # extract the vertical line
+            vertical = ""
+            for j in range(0, self.n):
+                vertical += self.current_state[j][i]
+            # check for a winner
+            if vertical.find('X' * self.s) != -1:
                 return 'X'
-            elif (self.current_state[i] == ['O', 'O', 'O']):
+            elif vertical.find('O' * self.s) != -1:
                 return 'O'
-        # Main diagonal win
-        if (self.current_state[0][0] != '.' and
-                self.current_state[0][0] == self.current_state[1][1] and
-                self.current_state[0][0] == self.current_state[2][2]):
-            return self.current_state[0][0]
-        # Second diagonal win
-        if (self.current_state[0][2] != '.' and
-                self.current_state[0][2] == self.current_state[1][1] and
-                self.current_state[0][2] == self.current_state[2][0]):
-            return self.current_state[0][2]
+
+        # Horizontal win
+        for i in range(0, self.n):
+            horizontal = ""
+            for j in range(0, self.n):
+                horizontal += self.current_state[i][j]
+            # check for winner
+            if horizontal.find('X' * self.s) != -1:
+                return 'X'
+            elif horizontal.find('O' * self.s) != -1:
+                return 'O'
+
+        # diagonal win
+        # first check the slash diagonal for possible winnings
+        slash_diag = self.get_diagonal("slash")
+        # loop over the list and check
+        for i in range(len(slash_diag)):
+            line = ""
+            for j in range(len(slash_diag[i])):
+                line += slash_diag[i][j]
+            # check for winner
+            if line.find('X' * self.s) != -1:
+                return 'X'
+            elif line.find('O' * self.s) != -1:
+                return 'O'
+
+        # then check the backslash diagonal for possible winnings
+        backslash_diag = self.get_diagonal("backslash")
+        for i in range(len(backslash_diag)):
+            line = ""
+            for j in range(len(backslash_diag[i])):
+                line += backslash_diag[i][j]
+            # check for winner
+            if line.find('X' * self.s) != -1:
+                return 'X'
+            elif line.find('O' * self.s) != -1:
+                return 'O'
+
         # Is whole board full?
-        for i in range(0, 3):
-            for j in range(0, 3):
-                # There's an empty field, we continue the game
+        for i in range(0, self.n):
+            for j in range(0, self.n):
+                # There's an empty field and nobody wins, we continue the game
                 if (self.current_state[i][j] == '.'):
                     return None
         # It's a tie!
@@ -277,17 +308,12 @@ class Game:
         for x in range(0, self.n):
             score += (pow(2, self.current_state[x].count('0')) - 1)
             score -= (pow(2, self.current_state[x].count('X')) - 1)
-        # diagonal evaluation
-        diff_size_win = self.n - self.s
 
         # if n != s, we do have four diagonals other than the two main diagonal. Otherwise, we only need to consider
         # slash "/"
-        list_all_diagonals_1 = [[self.current_state[y - x][x] for x in range(self.n) if 0 <= y - x < self.n] for y in
-                                range(2 * self.n - 1) if self.n - 1 + diff_size_win >= y >= self.n - 1 - diff_size_win]
+        list_all_diagonals_1 = self.get_diagonal("slash")
         # backslash "\"
-        list_all_diagonals_2 = [
-            [self.current_state[y - x][self.n - 1 - x] for x in range(self.n) if 0 <= y - x < self.n] for y in
-            range(2 * self.n - 1) if self.n - 1 + diff_size_win >= y >= self.n - 1 - diff_size_win]
+        list_all_diagonals_2 = self.get_diagonal("backslash")
         # Iterate all possible diagonals to calculate the score
         for x in list_all_diagonals_1:
             score += (pow(2, x.count('0')) - 1)
@@ -373,10 +399,17 @@ def main():
     # g.play(algo=Game.MINIMAX,player_x=Game.AI,player_o=Game.HUMAN)
     # convert the board coord's second (letter) to number
 
-    _n, _s, _b, _b_coord = user_input_board_config()
-    g = Game(n=_n, s=_s, b=_b, b_coord=_b_coord)
+    # _n, _s, _b, _b_coord = user_input_board_config()
+    g = Game(n=5, s=3, b=0)
+    g.current_state = [
+        ['X', '.', '.', '.', '.'],
+        ['O', 'X', 'X', '.', 'O'],
+        ['X', 'O', '.', 'O', '.'],
+        ['X', 'X', 'X', 'O', 'O'],
+        ['.', 'X', '.', 'X', '.']
+    ]
     g.draw_board()
-
+    print(g.check_end())
 
 if __name__ == "__main__":
     main()
