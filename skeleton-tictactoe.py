@@ -7,25 +7,60 @@ class Game:
 	ALPHABETA = 1
 	HUMAN = 2
 	AI = 3
-	
-	def __init__(self, recommend = True):
+
+	# n = board size [3...10]
+	# s = winning line up size [3...n]
+	# b = block size [0...2n]
+	# b_coord = block coordinates
+	def __init__(self, recommend = True, n = 3, s = 3, b = 0, b_coord=None):
+		# Initialize the parameters
+		self.n = n
+		self.s = s
+		self.b = b
+		if b_coord is None:
+			b_coord = []
+		self.b_coord = b_coord
+		print(self.b_coord)
 		self.initialize_game()
 		self.recommend = recommend
 		
 	def initialize_game(self):
-		# use for loop to generate 2-d list board
-		self.current_state = [['.','.','.'],
-							  ['.','.','.'],
-							  ['.','.','.']]
+		# generate 2-d list board based on n
+		self.current_state = []
+		for i in range(self.n):
+			temp_list = []
+			for j in range(self.n):
+				temp_list.append('.')
+			self.current_state.append(temp_list)
+
 		# mark the block with *
+		for i in range(self.b):
+			print(self.b_coord[i][0])
+			print(self.b_coord[i][1])
+			self.current_state[self.b_coord[i][0]][self.b_coord[i][1]] = '*'
 		# Player X always plays first
 		self.player_turn = 'X'
 
-	def draw_board(self):
+	def draw_board(self, move_no=""):
 		print()
 		# print ABCD - 0123 grid
-		for y in range(0, 3):
-			for x in range(0, 3):
+		# print table head - 1
+		print("  ", end="")
+		for i in range(0, self.n):
+			print(chr(i+65), end="")
+		# print table head - 2
+		print()
+		print(" +", end="")
+		for i in range(0, self.n):
+			print('-', end="")
+		print()
+
+		# print board content
+		for x in range(0, self.n):
+			# print static content (2 columns: 0|, 1| etc.) at the beginning of each line
+			print(F'{x}|', end='')
+			# print dynamic board content
+			for y in range(0, self.n):
 				print(F'{self.current_state[x][y]}', end="")
 			print()
 		print()
@@ -224,10 +259,76 @@ class Game:
 			self.current_state[x][y] = self.player_turn
 			self.switch_player()
 
+def user_input_board_config():
+	# input for board size
+	while True:
+		n = int(input("Please enter the board size (3-10): "))
+		if n < 3 or n > 10:
+			print("Please re-enter, the board size can only be 3 minimum or 10 maximum: ")
+		else:
+			break
+
+	# input for winning line-up size
+	while True:
+		s = int(input(F"Please enter the winning line-up size (3-{n}): "))
+		if s < 3 or s > n:
+			print(F"Please re-enter, the winning line-up can only be 3 minimum or {n} maximum: ")
+		else:
+			break
+
+	# input for block number
+	while True:
+		b = int(input(F"Please enter the block number (0-{2 * n}): "))
+		if b < 0 or b > 2*n:
+			print(F"Please re-enter, the block number can only be 0 minimum or {2*n} maximum: ")
+		else:
+			break
+
+	b_coord = []
+	for i in range(b):
+		has_duplicate = True
+		x = 0
+		y = 0
+		while has_duplicate:
+			has_duplicate = False
+			# input x coord
+			while True:
+				x = int(input(F"Please enter the {i + 1}/{b} x-coordinate for the block (0 - {n-1}): "))
+				if x < 0 or x >= n:
+					print(F"Please re-enter, the x-coordinate for the block can only be 0 minimum or {n-1} maximum: ")
+				else:
+					break
+
+			# input y coord
+			while True:
+				_y = input(F"Please enter the {i + 1}/{b} y-coordinate for the block (A - {chr(n-1 + 65)}): ")
+				y = ord(_y) - 65
+				if y < 0 or y >= n:
+					print(F"Please re-enter, the y-coordinate for the block can only be A minimum or {chr(n-1+65)} maximum")
+				else:
+					break
+
+			# find duplicates
+			for j in range(len(b_coord)):
+				if x == b_coord[j][0] and y == b_coord[j][1]:
+					print("The coordinate you entered already exist, please re-enter!")
+					has_duplicate = True
+					break
+
+		# append the x and y to b_coord
+		b_coord.append([x, y])
+
+	return (n, s, b, b_coord)
+
 def main():
-	g = Game(recommend=True)
-	g.play(algo=Game.ALPHABETA,player_x=Game.AI,player_o=Game.AI)
-	g.play(algo=Game.MINIMAX,player_x=Game.AI,player_o=Game.HUMAN)
+	# g = Game(recommend=True)
+	# g.play(algo=Game.ALPHABETA,player_x=Game.AI,player_o=Game.AI)
+	# g.play(algo=Game.MINIMAX,player_x=Game.AI,player_o=Game.HUMAN)
+	# convert the board coord's second (letter) to number
+
+	_n, _s, _b, _b_coord = user_input_board_config()
+	g = Game(n=_n, s=_s , b=_b, b_coord=_b_coord)
+	g.draw_board()
 
 if __name__ == "__main__":
 	main()
