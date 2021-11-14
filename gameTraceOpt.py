@@ -1,50 +1,73 @@
 def inGameTrace(f, move, evalTime, numOfStates, depthOfNodes):
-    # Todo 4. A display of the initial configuration of the board.
-
-    # 5(a) the move taken
-    f.write("The move taken: {}\n".format(move))
-
-    # Todo 5(b) the new configuration of the board
-
-    # 5(ci). The evaluation time of the heuristic (in seconds)
-    f.write("The evaluation time of the heuristic: {}s\n".format(evalTime))
-
-    # 5(cii). The number of states evaluated by the heuristic function
-    f.write("The number of states evaluated by the heuristic function: {}\n".format(numOfStates))
-
-    # 5(ciii). The number of states evaluated at each depth (consider the root to be at depth 0)
+    """Responsible for displaying in loop game trace."""
+    """
+       Imported Parameters
+       ----------
+            f : file writer
+            move : list
+                A list containing the move taken in this iteration
+            evalTime : float/int/double
+                The evaluation time of the heuristic (in seconds)
+            numOfStates : int
+                The number of states evaluated by the heuristic function
+            depthOfNodes : list of int
+                A list of the depth of each nodes
+                
+       Generated Parameters
+       ----------    
+            statesOfEachDepth: list of strings
+                The number of states evaluated at each depth (consider the root to be at depth 0)
+            averageDepth: double
+                The average depth (AD) of the heuristic evaluation in the tree
+    """
+    # generating parameters
     statesOfEachDepth = ["depth{} = {}".format(x, depthOfNodes.count(x)) for x in sorted(set(depthOfNodes))]
-    f.write("The number of states evaluated at each depth: {}\n".format(statesOfEachDepth))
-
-    # 5(civ). The average depth (AD) of the heuristic evaluation in the tree
     averageDepth = sum(depthOfNodes) / len(depthOfNodes)
-    f.write("The average depth (AD): {}\n".format(averageDepth))
 
+    # write
+    # Todo 4. A display of the initial configuration of the board.
+    # expecting drawBoard return a string
+    f.write("5(a). The move taken: {}\n".format(move))
+    # Todo 5(b) the new configuration of the board
+    # expecting drawBoard return a string
+    f.write("5(ci). The evaluation time of the heuristic: {}s\n".format(evalTime))
+    f.write("5(cii). The number of states evaluated by the heuristic function: {}\n".format(numOfStates))
+    f.write("5(ciii). The number of states evaluated at each depth: {}\n".format(statesOfEachDepth))
+    f.write("5(civ).The average depth (AD): {}\n".format(averageDepth))
     # Todo 5(cv). The average recursion depth (ARD) at the current state
-    f.write("The average recursion depth (ARD): {}\n\r".format(" "))
+    f.write("5(cv). The average recursion depth (ARD): {}\n\r".format(" "))
+    # need to write a recursive function to grab the information
 
 
 def endGameTrace(f, winner, avgEvalTime, totalEval, avgAvgDepth, statesEvalAtDepth, avgARD, totalMove):
-    # 6(a) the winner
-    f.write("The Winner: {}\n".format(winner))
-
-    # 6(bi). The average evaluation time of the heuristic for each state evaluated (in seconds)
-    f.write("6(b)i   Average evaluation time: {}\n".format(avgEvalTime))
-
-    # Todo 6(bii). The number of states evaluated by the heuristic function during the entire game
-    f.write("6(b)ii  Total heuristic evaluations: {}\n".format(totalEval))
-
-    # 6(biii). The average of the per-move average depth of the heuristic evaluation in the tree
-    f.write("6(b)iii Average of Average depth: {}\n".format(avgAvgDepth))
-
-    # 6(biv). The total number of states evaluated at each depth during the entire game
-    f.write("6(b)iv The total number of states evaluated at each depth: {}\n".format(statesEvalAtDepth))
-
-    # 6(bv). The average of the per-move average recursion depth
-    f.write("6(b)v Average of average recursion depth: {}\n".format(avgARD))
-
-    # 6(bvi). The total number of moves in the game
-    f.write("6(b)vi The total number of moves in the game: {}\n".format(totalMove))
+    """Responsible for displaying end game statics."""
+    """
+           Imported Parameters
+           ----------
+                f : file writer
+                the winner : string
+                    The name of the winner
+                avgEvalTime : float/int/double
+                    The average evaluation time of the heuristic for each state evaluated (in seconds)
+                totalEval : int
+                    The number of states evaluated by the heuristic function during the entire game
+                avgAvgDepth: float/double
+                    The average of the per-move average depth of the heuristic evaluation in the tree
+                statesEvalAtDepth: dict
+                    The total number of states evaluated at each depth during the entire game
+                avgARD:
+                    The average of the per-move average recursion depth
+                totalMove:
+                    The total number of moves in the game
+    """
+    # print
+    f.write("6(a). The Winner: {}\n".format(winner))
+    f.write("6(bi). Average evaluation time: {}\n".format(avgEvalTime))
+    f.write("6(bii). Total heuristic evaluations: {}\n".format(totalEval))
+    f.write("6(biii). Average of Average depth: {}\n".format(avgAvgDepth))
+    f.write("6(biv). The total number of states evaluated at each depth: {}\n".format(statesEvalAtDepth))
+    f.write("6(bv). Average of average recursion depth: {}\n".format(avgARD))
+    f.write("6(bvi). The total number of moves in the game: {}\n\r".format(totalMove))
 
 
 def main():
@@ -89,8 +112,8 @@ def main():
     # 2. The position of the blocs
     fWriter.write("Position of each blocs: {}\n\r".format(bloc))
     # 3. player info
-    fWriter.write("Player 1: {},{},{},{}\n".format(playerType1, depth1, a1, heuristicFunc1))
-    fWriter.write("Player 2: {},{},{},{}\n\r".format(playerType2, depth2, a2, heuristicFunc2))
+    fWriter.write("Player 1: {}, d={}, a={}, {}\n".format(playerType1, depth1, a1, heuristicFunc1))
+    fWriter.write("Player 2: {}, d={}, a={}, {}\n\r".format(playerType2, depth2, a2, heuristicFunc2))
 
     inGameTrace(fWriter, _move, _evalTime, _numOfStates, _depthOfNodes)
     endGameTrace(fWriter, _winner, _avgEvalTime, _totalEval, _avgAvgDepth, _statesEvalAtDepth, _avgARD, _totalMove)
