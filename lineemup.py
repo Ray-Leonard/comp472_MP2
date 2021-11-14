@@ -306,7 +306,7 @@ class Game:
         # the number of blocks can possibly adjust the score TO DO and TO TEST
         # row evaluation
         for x in range(0, self.n):
-            score += (pow(2, self.current_state[x].count('0')) - 1)
+            score += (pow(2, self.current_state[x].count('O')) - 1)
             score -= (pow(2, self.current_state[x].count('X')) - 1)
 
         # if n != s, we do have four diagonals other than the two main diagonal. Otherwise, we only need to consider
@@ -316,16 +316,16 @@ class Game:
         list_all_diagonals_2 = self.get_diagonal("backslash")
         # Iterate all possible diagonals to calculate the score
         for x in list_all_diagonals_1:
-            score += (pow(2, x.count('0')) - 1)
+            score += (pow(2, x.count('O')) - 1)
             score -= (pow(2, x.count('X')) - 1)
 
         for x in list_all_diagonals_2:
-            score += (pow(2, x.count('0')) - 1)
+            score += (pow(2, x.count('O')) - 1)
             score -= (pow(2, x.count('X')) - 1)
 
         # column evaluation
         for x in range(0, self.n):
-            score += (pow(2, [i[x] for i in self.current_state].count('0')) - 1)
+            score += (pow(2, [i[x] for i in self.current_state].count('O')) - 1)
             score -= (pow(2, [i[x] for i in self.current_state].count('X')) - 1)
         return score
 
