@@ -330,8 +330,8 @@ class Game:
         return score
 
     # -------------------------------------N-ply look ahead with heuristic(Minimax +
-    # alphabeta)---------------------------------------
-    def minimax_informed(self, depth, algo=h1(), max=False):
+    # alphabet)---------------------------------------
+    def minimax_informed(self, depth, max=False):
         # Minimizing for 'X' and maximizing for 'O'
         # Possible values are:
         # -1 - win for 'X'
@@ -342,14 +342,14 @@ class Game:
         y = None
         result = self.is_end()
         if result == 'X':
-            return (float('-inf'), x, y)
+            return float('-inf'), x, y
         elif result == 'O':
-            return (float('inf'), x, y)
+            return float('inf'), x, y
         elif result == '.':
-            return (0, x, y)
+            return 0, x, y
 
         if depth == 0:
-            return (algo, x, y)
+            return self.h1(), x, y
 
         # choose the max value on the max side while choose the min value on the min side
         value = float('inf')
@@ -375,9 +375,9 @@ class Game:
                             x = i
                             y = j
                     self.current_state[i][j] = '.'
-        return (value, x, y)
+        return value, x, y
 
-    def alphabeta_informed(self, depth, algo=h1(), alpha=float('-inf'), beta=float('inf'), max=False):
+    def alphabeta_informed(self, depth, alpha=float('-inf'), beta=float('inf'), max=False):
         # Minimizing for 'X' and maximizing for 'O'
         # Possible values are:
         # -1 - win for 'X'
@@ -388,14 +388,14 @@ class Game:
         y = None
         result = self.is_end()
         if result == 'X':
-            return (float('-inf'), x, y)
+            return float('-inf'), x, y
         elif result == 'O':
-            return (float('inf'), x, y)
+            return float('inf'), x, y
         elif result == '.':
-            return (0, x, y)
+            return 0, x, y
 
         if depth == 0:
-            return (algo, x, y)
+            return self.h1(), x, y
 
         value = float('inf')
         if max:
@@ -421,15 +421,15 @@ class Game:
                     self.current_state[i][j] = '.'
                     if max:
                         if value >= beta:
-                            return (value, x, y)
+                            return value, x, y
                         if value > alpha:
                             alpha = value
                     else:
                         if value <= alpha:
-                            return (value, x, y)
+                            return value, x, y
                         if value < beta:
                             beta = value
-        return (value, x, y)
+        return value, x, y
 
 
 def user_input_board_config():
@@ -492,7 +492,7 @@ def user_input_board_config():
         # append the x and y to b_coord
         b_coord.append([x, y])
 
-    return (n, s, b, b_coord)
+    return n, s, b, b_coord
 
 
 def main():
