@@ -72,8 +72,7 @@ class Game:
         print()
 
     def is_valid(self, px, py):
-        # change 2 to (n-1)
-        if px < 0 or px > 2 or py < 0 or py > 2:
+        if px < 0 or px > self.n-1 or py < 0 or py > self.n-1:
             return False
         elif self.current_state[px][py] != '.':
             return False
@@ -94,20 +93,12 @@ class Game:
                 return 'X'
             elif (self.current_state[i] == ['O', 'O', 'O']):
                 return 'O'
-        # Main diagonal win
-        if (self.current_state[0][0] != '.' and
-                self.current_state[0][0] == self.current_state[1][1] and
-                self.current_state[0][0] == self.current_state[2][2]):
-            return self.current_state[0][0]
-        # Second diagonal win
-        if (self.current_state[0][2] != '.' and
-                self.current_state[0][2] == self.current_state[1][1] and
-                self.current_state[0][2] == self.current_state[2][0]):
-            return self.current_state[0][2]
+        # diagonal win
+
         # Is whole board full?
-        for i in range(0, 3):
-            for j in range(0, 3):
-                # There's an empty field, we continue the game
+        for i in range(0, self.n):
+            for j in range(0, self.n):
+                # There's an empty field and nobody wins, we continue the game
                 if (self.current_state[i][j] == '.'):
                     return None
         # It's a tie!
@@ -266,6 +257,16 @@ class Game:
             self.current_state[x][y] = self.player_turn
             self.switch_player()
 
+    # get the possible winning diagonals as a 2d-list for the current game
+    def get_diagonal(self, orientation):
+        diff_size_win = self.n - self.s
+        if orientation == "slash":
+            return [[self.current_state[y - x][x] for x in range(self.n) if 0 <= y - x < self.n] for y in
+                                range(2 * self.n - 1) if self.n - 1 + diff_size_win >= y >= self.n - 1 - diff_size_win]
+        elif orientation == "backslash":
+            return [[self.current_state[y - x][self.n - 1 - x] for x in range(self.n) if 0 <= y - x < self.n] for y in
+                range(2 * self.n - 1) if self.n - 1 + diff_size_win >= y >= self.n - 1 - diff_size_win]
+
     # simple heuristic
     def h1(self):
         # X is for min; O is for max
@@ -277,17 +278,12 @@ class Game:
         for x in range(0, self.n):
             score += (pow(2, self.current_state[x].count('0')) - 1)
             score -= (pow(2, self.current_state[x].count('X')) - 1)
-        # diagonal evaluation
-        diff_size_win = self.n - self.s
 
         # if n != s, we do have four diagonals other than the two main diagonal. Otherwise, we only need to consider
         # slash "/"
-        list_all_diagonals_1 = [[self.current_state[y - x][x] for x in range(self.n) if 0 <= y - x < self.n] for y in
-                                range(2 * self.n - 1) if self.n - 1 + diff_size_win >= y >= self.n - 1 - diff_size_win]
+        list_all_diagonals_1 = get_diagonal("slash")
         # backslash "\"
-        list_all_diagonals_2 = [
-            [self.current_state[y - x][self.n - 1 - x] for x in range(self.n) if 0 <= y - x < self.n] for y in
-            range(2 * self.n - 1) if self.n - 1 + diff_size_win >= y >= self.n - 1 - diff_size_win]
+        list_all_diagonals_2 = get_diagonal("backslash")
         # Iterate all possible diagonals to calculate the score
         for x in list_all_diagonals_1:
             score += (pow(2, x.count('0')) - 1)
