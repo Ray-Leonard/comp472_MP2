@@ -71,13 +71,13 @@ class Game:
         diff_size_win = self.n - self.s
         if orientation == "slash":
             return [[self.current_state[y - x][x] for x in range(self.n) if 0 <= y - x < self.n] for y in
-                                range(2 * self.n - 1) if self.n - 1 + diff_size_win >= y >= self.n - 1 - diff_size_win]
+                    range(2 * self.n - 1) if self.n - 1 + diff_size_win >= y >= self.n - 1 - diff_size_win]
         elif orientation == "backslash":
             return [[self.current_state[y - x][self.n - 1 - x] for x in range(self.n) if 0 <= y - x < self.n] for y in
-                range(2 * self.n - 1) if self.n - 1 + diff_size_win >= y >= self.n - 1 - diff_size_win]
+                    range(2 * self.n - 1) if self.n - 1 + diff_size_win >= y >= self.n - 1 - diff_size_win]
 
     def is_valid(self, px, py):
-        if px < 0 or px > self.n-1 or py < 0 or py > self.n-1:
+        if px < 0 or px > self.n - 1 or py < 0 or py > self.n - 1:
             return False
         elif self.current_state[px][py] != '.':
             return False
@@ -329,6 +329,108 @@ class Game:
             score -= (pow(2, [i[x] for i in self.current_state].count('X')) - 1)
         return score
 
+    # -------------------------------------N-ply look ahead with heuristic(Minimax +
+    # alphabeta)---------------------------------------
+    def minimax_informed(self, depth, algo=h1(), max=False):
+        # Minimizing for 'X' and maximizing for 'O'
+        # Possible values are:
+        # -1 - win for 'X'
+        # 0  - a tie
+        # 1  - loss for 'X'
+        # We're initially setting it to 2 or -2 as worse than the worst case:
+        x = None
+        y = None
+        result = self.is_end()
+        if result == 'X':
+            return (float('-inf'), x, y)
+        elif result == 'O':
+            return (float('inf'), x, y)
+        elif result == '.':
+            return (0, x, y)
+
+        if depth == 0:
+            return (algo, x, y)
+
+        # choose the max value on the max side while choose the min value on the min side
+        value = float('inf')
+        if max:
+            value = float('-inf')
+
+        for i in range(0, self.n):
+            for j in range(0, self.n):
+                if self.current_state[i][j] == '.':
+                    if max:
+                        self.current_state[i][j] = 'O'
+                        (v, _, _) = self.minimax(depth - 1, max=False)
+                        if v > value:
+                            value_max = v
+                            x = i
+                            y = j
+                    else:
+
+                        self.current_state[i][j] = 'X'
+                        (v, _, _) = self.minimax(depth - 1, max=True)
+                        if v < value:
+                            value = v
+                            x = i
+                            y = j
+                    self.current_state[i][j] = '.'
+        return (value, x, y)
+
+    def alphabeta_informed(self, depth, algo=h1(), alpha=float('-inf'), beta=float('inf'), max=False):
+        # Minimizing for 'X' and maximizing for 'O'
+        # Possible values are:
+        # -1 - win for 'X'
+        # 0  - a tie
+        # 1  - loss for 'X'
+        # We're initially setting it to 2 or -2 as worse than the worst case:
+        x = None
+        y = None
+        result = self.is_end()
+        if result == 'X':
+            return (float('-inf'), x, y)
+        elif result == 'O':
+            return (float('inf'), x, y)
+        elif result == '.':
+            return (0, x, y)
+
+        if depth == 0:
+            return (algo, x, y)
+
+        value = float('inf')
+        if max:
+            value = float('-inf')
+
+        for i in range(0, self.n):
+            for j in range(0, self.n):
+                if self.current_state[i][j] == '.':
+                    if max:
+                        self.current_state[i][j] = 'O'
+                        (v, _, _) = self.alphabeta(depth - 1, alpha, beta, max=False)
+                        if v > value:
+                            value = v
+                            x = i
+                            y = j
+                    else:
+                        self.current_state[i][j] = 'X'
+                        (v, _, _) = self.alphabeta(depth - 1, alpha, beta, max=True)
+                        if v < value:
+                            value = v
+                            x = i
+                            y = j
+                    self.current_state[i][j] = '.'
+                    if max:
+                        if value >= beta:
+                            return (value, x, y)
+                        if value > alpha:
+                            alpha = value
+                    else:
+                        if value <= alpha:
+                            return (value, x, y)
+                        if value < beta:
+                            beta = value
+        return (value, x, y)
+
 
 def user_input_board_config():
     # input for board size
@@ -410,6 +512,7 @@ def main():
     ]
     g.draw_board()
     print(g.check_end())
+
 
 if __name__ == "__main__":
     main()
