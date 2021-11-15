@@ -1,6 +1,12 @@
 # simple heuristcs
 def h1(game):
-
+    result = game.is_end()
+    if result == 'X':
+        return float('-inf')
+    elif result == 'O':
+        return float('inf')
+    elif result == '.':
+        return 0
     # X is for min; O is for max
     score = 0
     # score is dependent of the number of X's or O's in rows, columns, and diagonals.
@@ -36,7 +42,13 @@ def h1(game):
 #complicated heuristics
 #return the number of possible winning rows,columns diagnols of max -the number possible winning rows, columns, diagnols of min
 def h2(game):
-
+    result = game.is_end()
+    if result == 'X':
+        return float('-inf')
+    elif result == 'O':
+        return float('inf')
+    elif result == '.':
+        return 0
 
     counter_max = 0
     counter_min = 0

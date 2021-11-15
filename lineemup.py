@@ -38,6 +38,10 @@ class Game:
 
         self.f = f
 
+        # for end game trace
+        self.avg_depth = []
+        self.avg_rec_depth = []
+
         self.initialize_game()
         self.recommend = recommend
 
@@ -56,7 +60,7 @@ class Game:
         # Player X always plays first
         self.player_turn = 'X'
 
-    def draw_board(self, move_no=""):
+    def draw_board(self):
         """Responsible for displaying board and return a board string"""
         """
             Parameters
@@ -203,6 +207,7 @@ class Game:
         # We're initially setting it to 2 or -2 as worse than the worst case:
         x = None
         y = None
+        elapsed_time = time.time() - self.timer_s
 
         result = self.is_end()
         if result == 'X':
@@ -212,13 +217,12 @@ class Game:
         elif result == '.':
             return 0, x, y, current_depth
 
-        elapsed_time = time.time() - self.timer_s
-
         # time up, return the current selection
         if depth == 0 or (self.t - elapsed_time) <= 0.0:
-            if (self.t - elapsed_time) <= 0.0:
-                print("out of time")
-            return Heuristics.h1(self), x, y, current_depth
+            self.eval_count += 1
+            self.depth_of_nodes.append(current_depth)
+            self.avg_depth_of_nodes.append(current_depth)
+            return Heuristics.h1(self) if self.player_turn == 'X' else Heuristics.h2(self), x, y, current_depth
 
         # choose the max value on the max side while choose the min value on the min side
         value = float('inf')
@@ -264,18 +268,22 @@ class Game:
         # We're initially setting it to 2 or -2 as worse than the worst case:
         x = None
         y = None
-        result = self.is_end()
-        if result == 'X':
-            return float('-inf'),x,y,current_depth
-        elif result == 'O':
-            return float('inf'),x,y,current_depth
-        elif result == '.':
-            return 0,x,y,current_depth
 
         elapsed_time = time.time() - self.timer_s
 
+        result = self.is_end()
+        if result == 'X':
+            return float('-inf'), x, y, current_depth
+        elif result == 'O':
+            return float('inf'), x, y, current_depth
+        elif result == '.':
+            return 0, x, y, current_depth
+
         if depth == 0 or (self.t - elapsed_time) <= 0:
-            return Heuristics.h2(self), x, y, current_depth
+            self.eval_count += 1
+            self.depth_of_nodes.append(current_depth)
+            self.avg_depth_of_nodes.append(current_depth)
+            return Heuristics.h1(self) if self.player_turn == 'X' else Heuristics.h2(self), x, y, current_depth
 
         value = float('inf')
         if max:
@@ -330,13 +338,27 @@ class Game:
         if player_o == None:
             player_o = self.HUMAN
 
-        while True:
+        self.move_count = 0
+        self.total_eval_time = 0
+        self.total_eval_count = 0
+        self.avg_depth_of_nodes = []
+        self.avg_ard_list = []
 
-            self.draw_board()
-            if self.check_end():
+        while True:
+            isGameEnd = self.check_end()
+            if isGameEnd:
+                # end game trace
+                gameTraceOpt.endGameTrace(self.f, isGameEnd, self.total_eval_time, self.total_eval_count,
+                                          self.avg_depth_of_nodes, self.avg_ard_list, self.move_count)
                 return
+            # meta data initialization
             start = time.time()
             self.timer_s = time.time()
+            # Num of heuristic evaluations
+            self.eval_count = 0
+            # depth of nodes
+            self.depth_of_nodes = []
+
             # run algo
             if self.player_turn == 'X':
                 if algo1 == Game.MINIMAX:
@@ -350,7 +372,6 @@ class Game:
                 elif algo2 == Game.ALPHABETA:
                     (_, x, y, ard) = self.alphabeta_informed(max=True, depth=self.d2, current_depth=0)
 
-            print("ARD: ", ard)
 
             end = time.time()
 
@@ -364,6 +385,14 @@ class Game:
                 print(F'Evaluation time: {round(end - start, 7)}s')
                 print(F'Player {self.player_turn} under AI control plays: x = {x}, y = {y}')
             self.current_state[x][y] = self.player_turn
+            # update global meta
+            self.move_count += 1
+            self.total_eval_time += end - start
+            self.total_eval_count += self.eval_count
+            self.avg_ard_list.append(ard)
+            gameTraceOpt.inGameTrace(self.f, self.player_turn, [x, chr(y+65)], self.draw_board(), end-start,
+                                     self.eval_count, self.depth_of_nodes, ard, self.move_count)
+
             self.switch_player()
 
 
@@ -454,21 +483,19 @@ def user_input_board_config():
     if player1 == Game.AI or player2 == Game.AI:
         t = float(input("Please enter max time allowed for AI"))
 
-
-
     return n, s, b, b_coord, player1, player2, d1, d2, algo1, algo2, t
 
 
 def main():
     # automatic
     _n = 5
-    _s = 4
-    _b = 2
-    _b_coord = [[0,2], [1,1]]
-    _d1 = 5
-    _d2 = 5
-    _t = 10
-    _algo1 = Game.MINIMAX
+    _s = 3
+    _b = 0
+    _b_coord = []
+    _d1 = 3
+    _d2 = 3
+    _t = 100
+    _algo1 = Game.ALPHABETA
     _algo2 = Game.ALPHABETA
     _player1 = Game.AI
     _player2 = Game.AI
@@ -484,8 +511,8 @@ def main():
     # 2. The position of the blocs
     fWriter.write("Position of each blocs: {}\n\r".format(_b_coord))
     # 3. player info
-    fWriter.write("Player 1: {}, d={}, a={}, {}\n".format(_player1, _d1, _algo1, "nmb"))
-    fWriter.write("Player 2: {}, d={}, a={}, {}\n\r".format(_player2, _d2, _algo2, "cnm"))
+    fWriter.write("Player 1: {}, d={}, a={}, {}\n".format(_player1, _d1, _algo1, "h1"))
+    fWriter.write("Player 2: {}, d={}, a={}, {}\n\r".format(_player2, _d2, _algo2, "h2"))
 
 
     g = Game(n=_n, s=_s, b=_b, b_coord=_b_coord, d1=_d1, d2=_d2, t=_t, f=fWriter)
