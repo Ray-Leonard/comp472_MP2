@@ -39,6 +39,7 @@ def h1(game):
         score -= (pow(2, [i[x] for i in game.current_state].count('X')) - 1)
     return score
 
+
 #complicated heuristics
 #return the number of possible winning rows,columns diagnols of max -the number possible winning rows, columns, diagnols of min
 def h2(game):

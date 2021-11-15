@@ -495,6 +495,7 @@ def main():
     _d1 = 3
     _d2 = 3
     _t = 100
+    _r = 10
     _algo1 = Game.ALPHABETA
     _algo2 = Game.ALPHABETA
     _player1 = Game.AI
@@ -520,8 +521,27 @@ def main():
     fWriter.write("4. Initial configuration of the board.{}\n".format(g.draw_board()))
 
     g.play(algo1=_algo1, algo2=_algo2, player_x=_player1, player_o=_player2)
-
-
     fWriter.close()
+
+    fileFormat = "scoredBoard.txt"
+    fWriter = open(fileFormat, "w")
+
+    # 1. The parameters of the game: the values of n, b, s, t
+    fWriter.write("Game parameters: [Size n = {}, Blocs b = {}, winSize s = {}, Overtime t = {}]\n".format(_n, _b, _s, _t))
+    # 2. player info
+    fWriter.write("Player 1: d={}, a={}, {}\n".format(_d1, _algo1, "h1"))
+    fWriter.write("Player 2: d={}, a={}, {}\n\r".format(_d2, _algo2, "h2"))
+    # 3. The number of games played (the value of 2xr)
+    fWriter.write("The number of games played: {}\n\r".format(2 * _r))
+    # 4. The number and percentage of wins for heuristic el and for heuristic e2
+
+    # fWriter.write("Total wins for heuristic e1: {} ({}) ({})\n\r".format(e1, e1 / (e1 + e2), heuristicFunc1))
+    # fWriter.write("Total wins for heuristic e2: {} ({}) ({})\n\r".format(e2, e2 / (e1 + e2), heuristicFunc2))
+    # # 5. total game trace:
+    # # note that every parameter was averaged over 2 x t (professor writes 2 x s, confused!)
+    # gameTraceOpt.endGameTrace(self.f, isGameEnd, self.total_eval_time, self.total_eval_count,
+    #                           self.avg_depth_of_nodes, self.avg_ard_list, self.move_count)
+
+
 if __name__ == "__main__":
     main()

@@ -72,11 +72,8 @@ def endGameTrace(f, winner, totalEvalTime, totalEval, depthOfNodes, avgARDList, 
     else:
         f.write("6(a). Tie\n")
 
-
     f.write("6(bi). Average evaluation time: {}\n".format(avgEvalTime))
-
     f.write("6(bii). Total heuristic evaluations: {}\n".format(totalEval))
-
     f.write("6(biii). Average of Average depth: {}\n".format(avgAvgDepth))
     f.write("6(biv). The total number of states evaluated at each depth: {}\n".format(statesEvalAtDepth))
     f.write("6(bv). Average of average recursion depth: {}\n".format(avgARD))
