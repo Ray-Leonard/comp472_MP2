@@ -1,0 +1,14 @@
+Game parameters: [Size n = 1, Blocs b = 2, winSize s = 3, Overtime t = 4]
+Player 1: d=5, a=True, manhattan
+Player 2: d=5, a=True, manhattan
+The number of games played: 20
+Total wins for heuristic e1: 3 (0.3) (manhattan)
+Total wins for heuristic e2: 7 (0.7) (manhattan)
+6(a). The Winner: AI-1
+6(bi). Average evaluation time: 5
+6(bii). Total heuristic evaluations: 9999999
+6(biii). Average of Average depth: 123456789
+6(biv). The total number of states evaluated at each depth: {4: 22582, 8: 175396, 7: 590, 6: 663, 5: 85744, 3: 88, 2: 20, 1: 2}
+6(bv). Average of average recursion depth: 8
+6(bvi). The total number of moves in the game: 999999999999
+

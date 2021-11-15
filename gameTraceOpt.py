@@ -1,14 +1,12 @@
 import lineemup
 
 
-def inGameTrace(f, oldBoardGraph, move, newBoardGraph, evalTime, numOfStates, depthOfNodes):
+def inGameTrace(f, move, newBoardGraph, evalTime, numOfStates, depthOfNodes):
     """Responsible for displaying in loop game trace."""
     """
        Imported Parameters
        ----------
             f : file writer
-            oldBoardGraph: string
-                a string containing the old boardGraph
             move : list
                 A list containing the move taken in this iteration
             newBoardGraph: string
@@ -32,8 +30,6 @@ def inGameTrace(f, oldBoardGraph, move, newBoardGraph, evalTime, numOfStates, de
     averageDepth = sum(depthOfNodes) / len(depthOfNodes)
 
     # write
-    # 4. A display of the initial configuration of the board.
-    f.write("4. Initial configuration of the board.{}\n".format(oldBoardGraph))
     f.write("5(a). The move taken: {}\n\r".format(move))
     f.write("5(b). New configuration of the board.{}\n".format(newBoardGraph))
     f.write("5(ci). The evaluation time of the heuristic: {}s\n".format(evalTime))
