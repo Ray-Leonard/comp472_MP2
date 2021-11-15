@@ -43,28 +43,32 @@ class Game:
         self.player_turn = 'X'
 
     def draw_board(self, move_no=""):
-        print()
-        # print ABCD - 0123 grid
-        # print table head - 1
-        print("  ", end="")
+        """Responsible for displaying board and return a board string"""
+        """
+            Parameters
+            ----------
+                boardGraph : string 
+                    containing board graph
+        """
+        # draw table head - 1
+        boardGraph = "\n  "
         for i in range(0, self.n):
-            print(chr(i + 65), end="")
-        # print table head - 2
-        print()
-        print(" +", end="")
+            boardGraph += chr(i + 65)
+        # draw table head - 2
+        boardGraph += "\n +"
         for i in range(0, self.n):
-            print('-', end="")
-        print()
+            boardGraph += "-"
+        boardGraph += "\n"
 
-        # print board content
+        # # print board content
         for x in range(0, self.n):
-            # print static content (2 columns: 0|, 1| etc.) at the beginning of each line
-            print(F'{x}|', end='')
+            boardGraph += "{}|".format(x)
             # print dynamic board content
             for y in range(0, self.n):
-                print(F'{self.current_state[x][y]}', end="")
-            print()
-        print()
+                boardGraph += "{}".format(self.current_state[x][y])
+            boardGraph += "\n"
+        print(boardGraph)
+        return boardGraph
 
     # get the possible winning diagonals as a 2d-list for the current game
     def get_diagonal(self, orientation):
@@ -510,7 +514,8 @@ def main():
         ['X', 'X', 'X', 'O', 'O'],
         ['.', 'X', '.', 'X', '.']
     ]
-    g.draw_board()
+    # add variable here just to notice you that for now draw_board can return string
+    boardGraph = g.draw_board()
     print(g.check_end())
 
 
