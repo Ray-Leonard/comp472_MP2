@@ -43,28 +43,41 @@ class Game:
         self.player_turn = 'X'
 
     def draw_board(self, move_no=""):
-        print()
-        # print ABCD - 0123 grid
+        """Responsible for displaying board"""
+        """
+            Parameters
+            ----------
+                    boardGraph : string 
+                        containing board graph
+        """
+        # boardGraph = ""
+        # print()
         # print table head - 1
-        print("  ", end="")
+        # print("  ", end="")
+        boardGraph = "\n "
+        # print ABCD - 0123 grid
         for i in range(0, self.n):
-            print(chr(i + 65), end="")
+            # print(chr(i + 65), end="")
+            boardGraph += chr(i + 65)
         # print table head - 2
-        print()
-        print(" +", end="")
+        boardGraph += "\n +"
+        # print()
+        # print(" +", end="")
         for i in range(0, self.n):
-            print('-', end="")
-        print()
+            # print('-', end="")
+            boardGraph += "-"
+        boardGraph += "\n"
+        # print()
 
-        # print board content
-        for x in range(0, self.n):
-            # print static content (2 columns: 0|, 1| etc.) at the beginning of each line
-            print(F'{x}|', end='')
-            # print dynamic board content
-            for y in range(0, self.n):
-                print(F'{self.current_state[x][y]}', end="")
-            print()
-        print()
+        # # print board content
+        # for x in range(0, self.n):
+        #     # print static content (2 columns: 0|, 1| etc.) at the beginning of each line
+        #     print(F'{x}|', end='')
+        #     # print dynamic board content
+        #     for y in range(0, self.n):
+        #         print(F'{self.current_state[x][y]}', end="")
+        #     print()
+        # print()
 
     # get the possible winning diagonals as a 2d-list for the current game
     def get_diagonal(self, orientation):
