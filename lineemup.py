@@ -2,6 +2,7 @@
 
 import time
 import gameTraceOpt
+import Heuristics
 
 class Game:
     MINIMAX = 0
@@ -191,51 +192,9 @@ class Game:
             self.player_turn = 'X'
         return self.player_turn
 
-    # simple heuristic
-    def h1(self):
-        # X is for min; O is for max
-        score = 0
-        # score is dependent of the number of X's or O's in rows, columns, and diagonals.
-        # the value added into or subtracted from the score is 2 powered to the number of X's or O's
-        # the number of blocks can possibly adjust the score TO DO and TO TEST
-        # row evaluation
-        for x in range(0, self.n):
-            score += (pow(2, self.current_state[x].count('O')) - 1)
-            score -= (pow(2, self.current_state[x].count('X')) - 1)
-
-        # if n != s, we do have four diagonals other than the two main diagonal. Otherwise, we only need to consider
-        # slash "/"
-        list_all_diagonals_1 = self.get_diagonal("slash")
-        # backslash "\"
-        list_all_diagonals_2 = self.get_diagonal("backslash")
-        # Iterate all possible diagonals to calculate the score
-        for x in list_all_diagonals_1:
-            score += (pow(2, x.count('O')) - 1)
-            score -= (pow(2, x.count('X')) - 1)
-
-        for x in list_all_diagonals_2:
-            score += (pow(2, x.count('O')) - 1)
-            score -= (pow(2, x.count('X')) - 1)
-
-        # column evaluation
-        for x in range(0, self.n):
-            score += (pow(2, [i[x] for i in self.current_state].count('O')) - 1)
-            score -= (pow(2, [i[x] for i in self.current_state].count('X')) - 1)
-        # print("h1 score = ", score)
-
-        result = self.is_end()
-        if result == 'X':
-            score = float('-inf')
-        elif result == 'O':
-            score = float('inf')
-        elif result == '.':
-            score = 0
-
-        return score
-
     # -------------------------------------N-ply look ahead with heuristic(Minimax +
     # alphabet)---------------------------------------
-    def minimax_informed(self, depth, max=False):
+    def minimax_informed(self, depth, current_depth, max=False):
         # Minimizing for 'X' and maximizing for 'O'
         # Possible values are:
         # -1 - win for 'X'
@@ -244,6 +203,14 @@ class Game:
         # We're initially setting it to 2 or -2 as worse than the worst case:
         x = None
         y = None
+
+        result = self.is_end()
+        if result == 'X':
+            return float('-inf'), x, y, current_depth
+        elif result == 'O':
+            return float('inf'), x, y, current_depth
+        elif result == '.':
+            return 0, x, y, current_depth
 
         elapsed_time = time.time() - self.timer_s
 
@@ -251,36 +218,44 @@ class Game:
         if depth == 0 or (self.t - elapsed_time) <= 0.0:
             if (self.t - elapsed_time) <= 0.0:
                 print("out of time")
-            return self.h1(), x, y
+            return Heuristics.h1(self), x, y, current_depth
 
         # choose the max value on the max side while choose the min value on the min side
         value = float('inf')
         if max:
             value = float('-inf')
 
+        num_children = 0
+        sum_children_depth = 0
+
         for i in range(0, self.n):
             for j in range(0, self.n):
                 if self.current_state[i][j] == '.':
                     if max:
                         self.current_state[i][j] = 'O'
-                        (v, _, _) = self.minimax_informed(depth - 1, max=False)
+                        (v, _, _, d) = self.minimax_informed(depth - 1, current_depth + 1,  max=False)
                         if v >= value:
                             value = v
                             x = i
                             y = j
+                        num_children += 1
+                        sum_children_depth += d
                     else:
 
                         self.current_state[i][j] = 'X'
-                        (v, _, _) = self.minimax_informed(depth - 1, max=True)
+                        (v, _, _, d) = self.minimax_informed(depth - 1, current_depth + 1,  max=True)
                         if v <= value:
                             value = v
                             x = i
                             y = j
+                        num_children += 1
+                        sum_children_depth += d
+
                     self.current_state[i][j] = '.'
-        return value, x, y
+        return value, x, y, float(sum_children_depth)/(1 if num_children == 0 else num_children)
 
 
-    def alphabeta_informed(self, depth, alpha=float('-inf'), beta=float('inf'), max=False):
+    def alphabeta_informed(self, depth, current_depth, alpha=float('-inf'), beta=float('inf'), max=False):
         # Minimizing for 'X' and maximizing for 'O'
         # Possible values are:
         # -1 - win for 'X'
@@ -289,45 +264,61 @@ class Game:
         # We're initially setting it to 2 or -2 as worse than the worst case:
         x = None
         y = None
+        result = self.is_end()
+        if result == 'X':
+            return float('-inf'),x,y,current_depth
+        elif result == 'O':
+            return float('inf'),x,y,current_depth
+        elif result == '.':
+            return 0,x,y,current_depth
 
         elapsed_time = time.time() - self.timer_s
 
         if depth == 0 or (self.t - elapsed_time) <= 0:
-            return self.h1(), x, y
+            return Heuristics.h2(self), x, y, current_depth
 
         value = float('inf')
         if max:
             value = float('-inf')
+
+        num_children = 0
+        sum_children_depth = 0
 
         for i in range(0, self.n):
             for j in range(0, self.n):
                 if self.current_state[i][j] == '.':
                     if max:
                         self.current_state[i][j] = 'O'
-                        (v, _, _) = self.alphabeta_informed(depth - 1, alpha, beta, max=False)
+                        (v, _, _, d) = self.alphabeta_informed(depth - 1, current_depth + 1, alpha, beta, max=False)
                         if v >= value:
                             value = v
                             x = i
                             y = j
+                        num_children += 1
+                        sum_children_depth += d
                     else:
                         self.current_state[i][j] = 'X'
-                        (v, _, _) = self.alphabeta_informed(depth - 1, alpha, beta, max=True)
+                        (v, _, _, d) = self.alphabeta_informed(depth - 1, current_depth + 1, alpha, beta, max=True)
                         if v <= value:
                             value = v
                             x = i
                             y = j
+                        num_children += 1
+                        sum_children_depth += d
+
                     self.current_state[i][j] = '.'
                     if max:
                         if value >= beta:
-                            return value, x, y
+                            return value, x, y, float(sum_children_depth)/(1 if num_children == 0 else num_children)
                         if value > alpha:
                             alpha = value
                     else:
                         if value <= alpha:
-                            return value, x, y
+                            return value, x, y, float(sum_children_depth)/(1 if num_children == 0 else num_children)
                         if value < beta:
                             beta = value
-        return value, x, y
+
+        return value, x, y, float(sum_children_depth)/(1 if num_children == 0 else num_children)
 
     def play(self, algo1=None, algo2=None, player_x=None, player_o=None):
         if algo1 == None:
@@ -338,6 +329,7 @@ class Game:
             player_x = self.HUMAN
         if player_o == None:
             player_o = self.HUMAN
+
         while True:
 
             self.draw_board()
@@ -348,16 +340,17 @@ class Game:
             # run algo
             if self.player_turn == 'X':
                 if algo1 == Game.MINIMAX:
-                    (_, x, y) = self.minimax_informed(max=False, depth=self.d1)
+                    (_, x, y, ard) = self.minimax_informed(max=False, depth=self.d1, current_depth=0)
                 elif algo1 == Game.ALPHABETA:
-                    (_, x, y) = self.alphabeta_informed(max=False, depth=self.d1)
+                    (_, x, y, ard) = self.alphabeta_informed(max=False, depth=self.d1, current_depth=0)
 
             elif self.player_turn == 'O':
                 if algo2 == Game.MINIMAX:
-                    (_, x, y) = self.minimax_informed(max=True, depth=self.d2)
+                    (_, x, y, ard) = self.minimax_informed(max=True, depth=self.d2, current_depth=0)
                 elif algo2 == Game.ALPHABETA:
-                    (_, x, y) = self.alphabeta_informed(max=True, depth=self.d2)
+                    (_, x, y, ard) = self.alphabeta_informed(max=True, depth=self.d2, current_depth=0)
 
+            print("ARD: ", ard)
 
             end = time.time()
 
