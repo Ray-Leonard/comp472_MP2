@@ -1,165 +1,0 @@
-Game parameters: [Size n = 5, Blocs b = 0, winSize s = 3, Overtime t = 100]
-Position of each blocs: []
-Player 1: 3, d=3, a=1, h1
-Player 2: 3, d=3, a=1, h2
-4. Initial configuration of the board.
-  ABCDE
- +-----
-0|.....
-1|.....
-2|.....
-3|.....
-4|.....
-
-5(a). X plays: [4, 'C']
-5(b). (move 1) 
-New configuration of the board.
-  ABCDE
- +-----
-0|.....
-1|.....
-2|.....
-3|.....
-4|..X..
-
-5(ci). The evaluation time of the heuristic: 0.11369895935058594s
-5(cii). The number of states evaluated by the heuristic function: 758
-5(ciii). The number of states evaluated at each depth: ['depth3 = 758']
-5(civ).The average depth (AD): 3.0
-5(cv). The average recursion depth (ARD): 3.0
-5(a). O plays: [4, 'E']
-5(b). (move 2) 
-New configuration of the board.
-  ABCDE
- +-----
-0|.....
-1|.....
-2|.....
-3|.....
-4|..X.O
-
-5(ci). The evaluation time of the heuristic: 0.19251418113708496s
-5(cii). The number of states evaluated by the heuristic function: 2425
-5(ciii). The number of states evaluated at each depth: ['depth3 = 2425']
-5(civ).The average depth (AD): 3.0
-5(cv). The average recursion depth (ARD): 3.0
-5(a). X plays: [4, 'B']
-5(b). (move 3) 
-New configuration of the board.
-  ABCDE
- +-----
-0|.....
-1|.....
-2|.....
-3|.....
-4|.XX.O
-
-5(ci). The evaluation time of the heuristic: 0.08178091049194336s
-5(cii). The number of states evaluated by the heuristic function: 2562
-5(ciii). The number of states evaluated at each depth: ['depth3 = 2562']
-5(civ).The average depth (AD): 3.0
-5(cv). The average recursion depth (ARD): 3.0
-5(a). O plays: [4, 'D']
-5(b). (move 4) 
-New configuration of the board.
-  ABCDE
- +-----
-0|.....
-1|.....
-2|.....
-3|.....
-4|.XXOO
-
-5(ci). The evaluation time of the heuristic: 0.07377409934997559s
-5(cii). The number of states evaluated by the heuristic function: 3895
-5(ciii). The number of states evaluated at each depth: ['depth3 = 3895']
-5(civ).The average depth (AD): 3.0
-5(cv). The average recursion depth (ARD): 2.9502164502164514
-5(a). X plays: [2, 'A']
-5(b). (move 5) 
-New configuration of the board.
-  ABCDE
- +-----
-0|.....
-1|.....
-2|X....
-3|.....
-4|.XXOO
-
-5(ci). The evaluation time of the heuristic: 0.06283187866210938s
-5(cii). The number of states evaluated by the heuristic function: 3898
-5(ciii). The number of states evaluated at each depth: ['depth3 = 3898']
-5(civ).The average depth (AD): 3.0
-5(cv). The average recursion depth (ARD): 3.0
-5(a). O plays: [4, 'A']
-5(b). (move 6) 
-New configuration of the board.
-  ABCDE
- +-----
-0|.....
-1|.....
-2|X....
-3|.....
-4|OXXOO
-
-5(ci). The evaluation time of the heuristic: 0.045877933502197266s
-5(cii). The number of states evaluated by the heuristic function: 2909
-5(ciii). The number of states evaluated at each depth: ['depth3 = 2909']
-5(civ).The average depth (AD): 3.0
-5(cv). The average recursion depth (ARD): 2.934868421052631
-5(a). X plays: [0, 'A']
-5(b). (move 7) 
-New configuration of the board.
-  ABCDE
- +-----
-0|X....
-1|.....
-2|X....
-3|.....
-4|OXXOO
-
-5(ci). The evaluation time of the heuristic: 0.0019941329956054688s
-5(cii). The number of states evaluated by the heuristic function: 77
-5(ciii). The number of states evaluated at each depth: ['depth3 = 77']
-5(civ).The average depth (AD): 3.0
-5(cv). The average recursion depth (ARD): 3.0
-5(a). O plays: [3, 'E']
-5(b). (move 8) 
-New configuration of the board.
-  ABCDE
- +-----
-0|X....
-1|.....
-2|X....
-3|....O
-4|OXXOO
-
-5(ci). The evaluation time of the heuristic: 0.01795196533203125s
-5(cii). The number of states evaluated by the heuristic function: 854
-5(ciii). The number of states evaluated at each depth: ['depth3 = 854']
-5(civ).The average depth (AD): 3.0
-5(cv). The average recursion depth (ARD): 2.7960317460317454
-5(a). X plays: [1, 'A']
-5(b). (move 9) 
-New configuration of the board.
-  ABCDE
- +-----
-0|X....
-1|X....
-2|X....
-3|....O
-4|OXXOO
-
-5(ci). The evaluation time of the heuristic: 0.0019948482513427734s
-5(cii). The number of states evaluated by the heuristic function: 82
-5(ciii). The number of states evaluated at each depth: ['depth3 = 82']
-5(civ).The average depth (AD): 3.0
-5(cv). The average recursion depth (ARD): 2.533333333333333
-6(a). The Winner: X
-6(bi). Average evaluation time: 0.06582432323031956
-6(bii). Total heuristic evaluations: 17460
-6(biii). Average of Average depth: 3.0
-6(biv). The total number of states evaluated at each depth: ['depth3 = 17460']
-6(bv). Average of average recursion depth: 2.9127166611815736
-6(bvi). The total number of moves in the game: 9
-
