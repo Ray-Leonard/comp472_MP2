@@ -4,17 +4,19 @@ import time
 import gameTraceOpt
 import Heuristics
 
+
 class Game:
     MINIMAX = 0
     ALPHABETA = 1
     HUMAN = 2
     AI = 3
+    list_of_winner = []
 
     # n = board size [3...10]
     # s = winning line up size [3...n]
     # b = block size [0...2n]
     # b_coord = block coordinates
-    def __init__(self, recommend=True, n=3, s=3, b=0, b_coord=None, d1=None, d2=None, t=None, f=None):
+    def __init__(self, recommend=True, n=3, s=3, b=0, b_coord=None, d1=None, d2=None, t=None, f=None, h_swap=None):
         # Initialize the parameters
         self.n = n
         self.s = s
@@ -35,6 +37,10 @@ class Game:
         if b_coord is None:
             b_coord = []
         self.b_coord = b_coord
+
+        if h_swap is None:
+            h_swap = False
+        self.h_swap = h_swap
 
         self.f = f
 
@@ -222,7 +228,10 @@ class Game:
             self.eval_count += 1
             self.depth_of_nodes.append(current_depth)
             self.avg_depth_of_nodes.append(current_depth)
-            return Heuristics.h1(self) if self.player_turn == 'X' else Heuristics.h2(self), x, y, current_depth
+            if not self.h_swap:
+                return Heuristics.h1(self) if self.player_turn == 'X' else Heuristics.h2(self), x, y, current_depth
+            else:
+                return Heuristics.h2(self) if self.player_turn == 'X' else Heuristics.h1(self), x, y, current_depth
 
         # choose the max value on the max side while choose the min value on the min side
         value = float('inf')
@@ -237,7 +246,7 @@ class Game:
                 if self.current_state[i][j] == '.':
                     if max:
                         self.current_state[i][j] = 'O'
-                        (v, _, _, d) = self.minimax_informed(depth - 1, current_depth + 1,  max=False)
+                        (v, _, _, d) = self.minimax_informed(depth - 1, current_depth + 1, max=False)
                         if v >= value:
                             value = v
                             x = i
@@ -247,7 +256,7 @@ class Game:
                     else:
 
                         self.current_state[i][j] = 'X'
-                        (v, _, _, d) = self.minimax_informed(depth - 1, current_depth + 1,  max=True)
+                        (v, _, _, d) = self.minimax_informed(depth - 1, current_depth + 1, max=True)
                         if v <= value:
                             value = v
                             x = i
@@ -256,8 +265,7 @@ class Game:
                         sum_children_depth += d
 
                     self.current_state[i][j] = '.'
-        return value, x, y, float(sum_children_depth)/(1 if num_children == 0 else num_children)
-
+        return value, x, y, float(sum_children_depth) / (1 if num_children == 0 else num_children)
 
     def alphabeta_informed(self, depth, current_depth, alpha=float('-inf'), beta=float('inf'), max=False):
         # Minimizing for 'X' and maximizing for 'O'
@@ -282,8 +290,12 @@ class Game:
         if depth == 0 or (self.t - elapsed_time) <= 0:
             self.eval_count += 1
             self.depth_of_nodes.append(current_depth)
+            # Fixme avg_depth_of_nodes is completely same as depth_of_nodes isn't it?
             self.avg_depth_of_nodes.append(current_depth)
-            return Heuristics.h1(self) if self.player_turn == 'X' else Heuristics.h2(self), x, y, current_depth
+            if not self.h_swap:
+                return Heuristics.h1(self) if self.player_turn == 'X' else Heuristics.h2(self), x, y, current_depth
+            else:
+                return Heuristics.h2(self) if self.player_turn == 'X' else Heuristics.h1(self), x, y, current_depth
 
         value = float('inf')
         if max:
@@ -317,16 +329,16 @@ class Game:
                     self.current_state[i][j] = '.'
                     if max:
                         if value >= beta:
-                            return value, x, y, float(sum_children_depth)/(1 if num_children == 0 else num_children)
+                            return value, x, y, float(sum_children_depth) / (1 if num_children == 0 else num_children)
                         if value > alpha:
                             alpha = value
                     else:
                         if value <= alpha:
-                            return value, x, y, float(sum_children_depth)/(1 if num_children == 0 else num_children)
+                            return value, x, y, float(sum_children_depth) / (1 if num_children == 0 else num_children)
                         if value < beta:
                             beta = value
 
-        return value, x, y, float(sum_children_depth)/(1 if num_children == 0 else num_children)
+        return value, x, y, float(sum_children_depth) / (1 if num_children == 0 else num_children)
 
     def play(self, algo1=None, algo2=None, player_x=None, player_o=None):
         if algo1 == None:
@@ -343,21 +355,33 @@ class Game:
         self.total_eval_count = 0
         self.avg_depth_of_nodes = []
         self.avg_ard_list = []
+        # Num of heuristic evaluations
+        self.eval_count = 0
+        # depth of nodes
+        self.depth_of_nodes = []
+
 
         while True:
             isGameEnd = self.check_end()
             if isGameEnd:
                 # end game trace
+                if isGameEnd == "X":
+                    if algo1 == Game.MINIMAX:
+                        self.list_of_winner.append("h1") if not self.h_swap else self.list_of_winner.append("h2")
+                    else:
+                        self.list_of_winner.append("h2") if not self.h_swap else self.list_of_winner.append("h1")
+                if isGameEnd == "O":
+                    if algo2 == Game.ALPHABETA:
+                        self.list_of_winner.append("h2") if not self.h_swap else self.list_of_winner.append("h1")
+                    else:
+                        self.list_of_winner.append("h1") if not self.h_swap else self.list_of_winner.append("h2")
+                # Todo: need to create a bunch of variable to collect sh*t for the avg_avg_avg_stuff
                 gameTraceOpt.endGameTrace(self.f, isGameEnd, self.total_eval_time, self.total_eval_count,
                                           self.avg_depth_of_nodes, self.avg_ard_list, self.move_count)
                 return
             # meta data initialization
             start = time.time()
             self.timer_s = time.time()
-            # Num of heuristic evaluations
-            self.eval_count = 0
-            # depth of nodes
-            self.depth_of_nodes = []
 
             # run algo
             if self.player_turn == 'X':
@@ -371,7 +395,6 @@ class Game:
                     (_, x, y, ard) = self.minimax_informed(max=True, depth=self.d2, current_depth=0)
                 elif algo2 == Game.ALPHABETA:
                     (_, x, y, ard) = self.alphabeta_informed(max=True, depth=self.d2, current_depth=0)
-
 
             end = time.time()
 
@@ -390,7 +413,7 @@ class Game:
             self.total_eval_time += end - start
             self.total_eval_count += self.eval_count
             self.avg_ard_list.append(ard)
-            gameTraceOpt.inGameTrace(self.f, self.player_turn, [x, chr(y+65)], self.draw_board(), end-start,
+            gameTraceOpt.inGameTrace(self.f, self.player_turn, [x, chr(y + 65)], self.draw_board(), end - start,
                                      self.eval_count, self.depth_of_nodes, ard, self.move_count)
 
             self.switch_player()
@@ -456,7 +479,6 @@ def user_input_board_config():
         # append the x and y to b_coord
         b_coord.append([x, y])
 
-
     # play mode
     player1 = input("Please enter player1 mode (AI or HUMAN): ")
     player1 = Game.AI if player1 == "AI" else Game.HUMAN
@@ -487,6 +509,9 @@ def user_input_board_config():
 
 
 def main():
+    # user input
+    # _n, _s, _b, _b_coord, _player1, _player2, _d1, _d2, _algo1, _algo2, _t = user_input_board_config()
+
     # automatic
     _n = 5
     _s = 3
@@ -495,52 +520,65 @@ def main():
     _d1 = 3
     _d2 = 3
     _t = 100
-    _r = 10
-    _algo1 = Game.ALPHABETA
+    _r = 2
+    _algo1 = Game.MINIMAX
     _algo2 = Game.ALPHABETA
     _player1 = Game.AI
     _player2 = Game.AI
-    # user input
-    # _n, _s, _b, _b_coord, _player1, _player2, _d1, _d2, _algo1, _algo2, _t = user_input_board_config()
+    _h_swap = False
 
+    """single run"""
     # start writing
     fileFormat = "gameTrace-{}{}{}{}.txt".format(_n, _b, _s, _t)
     fWriter = open(fileFormat, "w")
 
     # 1. The parameters of the game: the values of n, b, s, t
-    fWriter.write("Game parameters: [Size n = {}, Blocs b = {}, winSize s = {}, Overtime t = {}]\n".format(_n, _b, _s, _t))
+    fWriter.write(
+        "Game parameters: [Size n = {}, Blocs b = {}, winSize s = {}, Overtime t = {}]\n".format(_n, _b, _s, _t))
     # 2. The position of the blocs
     fWriter.write("Position of each blocs: {}\n\r".format(_b_coord))
     # 3. player info
     fWriter.write("Player 1: {}, d={}, a={}, {}\n".format(_player1, _d1, _algo1, "h1"))
     fWriter.write("Player 2: {}, d={}, a={}, {}\n\r".format(_player2, _d2, _algo2, "h2"))
 
-
-    g = Game(n=_n, s=_s, b=_b, b_coord=_b_coord, d1=_d1, d2=_d2, t=_t, f=fWriter)
+    g = Game(n=_n, s=_s, b=_b, b_coord=_b_coord, d1=_d1, d2=_d2, t=_t, f=fWriter, h_swap=_h_swap)
     # 4. initial config of board
     fWriter.write("4. Initial configuration of the board.{}\n".format(g.draw_board()))
-
     g.play(algo1=_algo1, algo2=_algo2, player_x=_player1, player_o=_player2)
     fWriter.close()
 
+    """2 x r run"""
+    # writing
     fileFormat = "scoredBoard.txt"
     fWriter = open(fileFormat, "w")
 
     # 1. The parameters of the game: the values of n, b, s, t
-    fWriter.write("Game parameters: [Size n = {}, Blocs b = {}, winSize s = {}, Overtime t = {}]\n".format(_n, _b, _s, _t))
+    fWriter.write(
+        "Game parameters: [Size n = {}, Blocs b = {}, winSize s = {}, Overtime t = {}]\n".format(_n, _b, _s, _t))
     # 2. player info
     fWriter.write("Player 1: d={}, a={}, {}\n".format(_d1, _algo1, "h1"))
     fWriter.write("Player 2: d={}, a={}, {}\n\r".format(_d2, _algo2, "h2"))
     # 3. The number of games played (the value of 2xr)
     fWriter.write("The number of games played: {}\n\r".format(2 * _r))
     # 4. The number and percentage of wins for heuristic el and for heuristic e2
+    g = Game(n=_n, s=_s, b=_b, b_coord=_b_coord, d1=_d1, d2=_d2, t=_t, f=fWriter, h_swap=_h_swap)
+    g.list_of_winner = []
+    for i in range(0, _r):
+        g.play(algo1=_algo1, algo2=_algo2, player_x=_player1, player_o=_player2)
+    for i in range(0, _r):
+        g.play(algo1=_algo1, algo2=_algo2, player_x=_player2, player_o=_player1)
+    winningStat = {x: g.list_of_winner.count(x) for x in sorted(set(g.list_of_winner))}
+    totalWinCount = len(g.list_of_winner)
+    h1Win = winningStat['h1'] if 'h1' in winningStat else 0
+    h2Win = winningStat['h2'] if 'h2' in winningStat else 0
+    fWriter.write("Total wins for heuristic e1: {}, ({}%) ({})\n".format(h1Win, 100*(h1Win / totalWinCount), 'simple'))
+    fWriter.write("Total wins for heuristic e2: {}, ({}%) ({})\n\r".format(h2Win,
+                                                                           100*(h2Win / totalWinCount), 'complicate'))
 
-    # fWriter.write("Total wins for heuristic e1: {} ({}) ({})\n\r".format(e1, e1 / (e1 + e2), heuristicFunc1))
-    # fWriter.write("Total wins for heuristic e2: {} ({}) ({})\n\r".format(e2, e2 / (e1 + e2), heuristicFunc2))
-    # # 5. total game trace:
-    # # note that every parameter was averaged over 2 x t (professor writes 2 x s, confused!)
+    # 5. total game trace:
+    # note that every parameter was averaged over 2 x r
     # gameTraceOpt.endGameTrace(self.f, isGameEnd, self.total_eval_time, self.total_eval_count,
-    #                           self.avg_depth_of_nodes, self.avg_ard_list, self.move_count)
+    #                                       self.avg_depth_of_nodes, self.avg_ard_list, self.move_count)
 
 
 if __name__ == "__main__":
