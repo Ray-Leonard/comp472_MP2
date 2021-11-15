@@ -43,41 +43,32 @@ class Game:
         self.player_turn = 'X'
 
     def draw_board(self, move_no=""):
-        """Responsible for displaying board"""
+        """Responsible for displaying board and return a board string"""
         """
             Parameters
             ----------
-                    boardGraph : string 
-                        containing board graph
+                boardGraph : string 
+                    containing board graph
         """
-        # boardGraph = ""
-        # print()
-        # print table head - 1
-        # print("  ", end="")
-        boardGraph = "\n "
-        # print ABCD - 0123 grid
+        # draw table head - 1
+        boardGraph = "\n  "
         for i in range(0, self.n):
-            # print(chr(i + 65), end="")
             boardGraph += chr(i + 65)
-        # print table head - 2
+        # draw table head - 2
         boardGraph += "\n +"
-        # print()
-        # print(" +", end="")
         for i in range(0, self.n):
-            # print('-', end="")
             boardGraph += "-"
         boardGraph += "\n"
-        # print()
 
         # # print board content
-        # for x in range(0, self.n):
-        #     # print static content (2 columns: 0|, 1| etc.) at the beginning of each line
-        #     print(F'{x}|', end='')
-        #     # print dynamic board content
-        #     for y in range(0, self.n):
-        #         print(F'{self.current_state[x][y]}', end="")
-        #     print()
-        # print()
+        for x in range(0, self.n):
+            boardGraph += "{}|".format(x)
+            # print dynamic board content
+            for y in range(0, self.n):
+                boardGraph += "{}".format(self.current_state[x][y])
+            boardGraph += "\n"
+        print(boardGraph)
+        return boardGraph
 
     # get the possible winning diagonals as a 2d-list for the current game
     def get_diagonal(self, orientation):
@@ -523,7 +514,8 @@ def main():
         ['X', 'X', 'X', 'O', 'O'],
         ['.', 'X', '.', 'X', '.']
     ]
-    g.draw_board()
+    # add variable here just to notice you that for now draw_board can return string
+    boardGraph = g.draw_board()
     print(g.check_end())
 
 

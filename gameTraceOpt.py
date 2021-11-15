@@ -1,11 +1,18 @@
-def inGameTrace(f, move, evalTime, numOfStates, depthOfNodes):
+import lineemup
+
+
+def inGameTrace(f, oldBoardGraph, move, newBoardGraph, evalTime, numOfStates, depthOfNodes):
     """Responsible for displaying in loop game trace."""
     """
        Imported Parameters
        ----------
             f : file writer
+            oldBoardGraph: string
+                a string containing the old boardGraph
             move : list
                 A list containing the move taken in this iteration
+            newBoardGraph: string
+                a string containing the new boardGraph
             evalTime : float/int/double
                 The evaluation time of the heuristic (in seconds)
             numOfStates : int
@@ -25,11 +32,10 @@ def inGameTrace(f, move, evalTime, numOfStates, depthOfNodes):
     averageDepth = sum(depthOfNodes) / len(depthOfNodes)
 
     # write
-    # Todo 4. A display of the initial configuration of the board.
-    # expecting drawBoard return a string
-    f.write("5(a). The move taken: {}\n".format(move))
-    # Todo 5(b) the new configuration of the board
-    # expecting drawBoard return a string
+    # 4. A display of the initial configuration of the board.
+    f.write("4. Initial configuration of the board.{}\n".format(oldBoardGraph))
+    f.write("5(a). The move taken: {}\n\r".format(move))
+    f.write("5(b). New configuration of the board.{}\n".format(newBoardGraph))
     f.write("5(ci). The evaluation time of the heuristic: {}s\n".format(evalTime))
     f.write("5(cii). The number of states evaluated by the heuristic function: {}\n".format(numOfStates))
     f.write("5(ciii). The number of states evaluated at each depth: {}\n".format(statesOfEachDepth))
@@ -103,6 +109,26 @@ def main():
     _avgARD = 8
     _totalMove = 999999999999
 
+    #sample graph
+    g = lineemup.Game(n=5, s=3, b=0)
+    g1 = lineemup.Game(n=5, s=3, b=0)
+    g.current_state = [
+        ['X', '.', '.', '.', '.'],
+        ['O', 'X', 'X', '.', 'O'],
+        ['X', 'O', '.', 'O', '.'],
+        ['X', 'X', 'X', 'O', 'O'],
+        ['.', 'X', '.', 'X', '.']
+    ]
+    g1.current_state = [
+        ['X', '.', 'O', 'O', 'O'],
+        ['O', 'X', 'X', '.', 'O'],
+        ['X', 'O', 'O', 'O', 'O'],
+        ['X', 'X', 'X', 'O', 'O'],
+        ['O', 'X', '.', 'X', '.']
+    ]
+    oldBoardGraph = g.draw_board()
+    newBoardGraph = g1.draw_board()
+
     # start writing
     fileFormat = "gameTrace-{}{}{}{}.txt".format(n, b, s, t)
     fWriter = open(fileFormat, "w")
@@ -115,7 +141,7 @@ def main():
     fWriter.write("Player 1: {}, d={}, a={}, {}\n".format(playerType1, depth1, a1, heuristicFunc1))
     fWriter.write("Player 2: {}, d={}, a={}, {}\n\r".format(playerType2, depth2, a2, heuristicFunc2))
 
-    inGameTrace(fWriter, _move, _evalTime, _numOfStates, _depthOfNodes)
+    inGameTrace(fWriter, oldBoardGraph, _move, newBoardGraph, _evalTime, _numOfStates, _depthOfNodes)
     endGameTrace(fWriter, _winner, _avgEvalTime, _totalEval, _avgAvgDepth, _statesEvalAtDepth, _avgARD, _totalMove)
 
     fWriter.close()
