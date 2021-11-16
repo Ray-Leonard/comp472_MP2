@@ -1,6 +1,9 @@
 # Line ’em Up
 > An python project using pypy runtime
 
+# Repository Link
+https://github.com/Ray-Leonard/comp472_MP2
+
 ## Development Environment Setup
 ### Prerequisites
 1. Have `Python 3.7.9` installed in your machine.
