@@ -27,7 +27,7 @@ def inGameTrace(f, curr_player, move, newBoardGraph, evalTime, numOfStates, dept
     """
     # generating parameters
     statesOfEachDepth = ["depth{} = {}".format(x, depthOfNodes.count(x)) for x in sorted(set(depthOfNodes))]
-    averageDepth = sum(depthOfNodes) / len(depthOfNodes)
+    averageDepth = sum(depthOfNodes) / (len(depthOfNodes) if len(depthOfNodes) != 0 else 1)
 
     # write
     f.write("5(a). {} plays: {}\n\r".format(curr_player, move))
@@ -63,8 +63,8 @@ def endGameTrace(f, winner, totalEvalTime, totalEval, depthOfNodes, avgARDList, 
 
     avgEvalTime = totalEvalTime / totalMove
     statesEvalAtDepth = ["depth{} = {}".format(x, depthOfNodes.count(x)) for x in sorted(set(depthOfNodes))]
-    avgAvgDepth = sum(depthOfNodes) / len(depthOfNodes)
-    avgARD = sum(avgARDList) / len(avgARDList)
+    avgAvgDepth = sum(depthOfNodes) / (len(depthOfNodes) if len(depthOfNodes) != 0 else 1)
+    avgARD = sum(avgARDList) / (len(avgARDList) if len(avgARDList) != 0 else 1)
 
     # print
     if winner != '.':
@@ -79,4 +79,17 @@ def endGameTrace(f, winner, totalEvalTime, totalEval, depthOfNodes, avgARDList, 
     f.write("6(bv). Average of average recursion depth: {}\n".format(avgARD))
     f.write("6(bvi). The total number of moves in the game: {}\n\r".format(totalMove))
 
+def scoreBoardOutput(f, totalEvalTime, totalEval, depthOfNodes, avgARDList, totalMove, numOfPlays):
 
+    avgEvalTime = totalEvalTime / totalMove
+    statesEvalAtDepth = ["depth{} = {}".format(x, depthOfNodes.count(x)) for x in sorted(set(depthOfNodes))]
+    avgAvgDepth = sum(depthOfNodes) / (len(depthOfNodes) if len(depthOfNodes) != 0 else 1)
+    avgARD = sum(avgARDList) / (len(avgARDList) if len(avgARDList) != 0 else 1)
+    avgMove = totalMove / float(numOfPlays)
+
+    f.write("i. Average evaluation time: {}\n".format(avgEvalTime))
+    f.write("ii. Total heuristic evaluations: {}\n".format(totalEval))
+    f.write("iii. Average of Average depth: {}\n".format(avgAvgDepth))
+    f.write("iv. The total number of states evaluated at each depth: {}\n".format(statesEvalAtDepth))
+    f.write("v. Average of average recursion depth: {}\n".format(avgARD))
+    f.write("vi. Average moves per game: {}\n\r".format(avgMove))

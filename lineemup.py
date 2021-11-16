@@ -11,6 +11,11 @@ class Game:
     HUMAN = 2
     AI = 3
     list_of_winner = []
+    total_total_eval_time = 0
+    total_move = 0
+    total_total_eval_count = 0
+    avg_avg_depth_of_nodes = []
+    avg_avg_ard_list = []
 
     # n = board size [3...10]
     # s = winning line up size [3...n]
@@ -228,6 +233,7 @@ class Game:
             self.eval_count += 1
             self.depth_of_nodes.append(current_depth)
             self.avg_depth_of_nodes.append(current_depth)
+            Game.avg_avg_depth_of_nodes.append(current_depth)
             if not self.h_swap:
                 return Heuristics.h1(self) if self.player_turn == 'X' else Heuristics.h2(self), x, y, current_depth
             else:
@@ -291,6 +297,7 @@ class Game:
             self.eval_count += 1
             self.depth_of_nodes.append(current_depth)
             self.avg_depth_of_nodes.append(current_depth)
+            Game.avg_avg_depth_of_nodes.append(current_depth)
             if not self.h_swap:
                 return Heuristics.h1(self) if self.player_turn == 'X' else Heuristics.h2(self), x, y, current_depth
             else:
@@ -362,18 +369,21 @@ class Game:
             if isGameEnd:
                 # end game trace
                 if isGameEnd == "X":
-                    if algo1 == Game.MINIMAX:
-                        self.list_of_winner.append("h1") if not self.h_swap else self.list_of_winner.append("h2")
-                    else:
-                        self.list_of_winner.append("h2") if not self.h_swap else self.list_of_winner.append("h1")
+                    self.list_of_winner.append("h1") if not self.h_swap else self.list_of_winner.append("h2")
                 if isGameEnd == "O":
-                    if algo2 == Game.ALPHABETA:
-                        self.list_of_winner.append("h2") if not self.h_swap else self.list_of_winner.append("h1")
-                    else:
-                        self.list_of_winner.append("h1") if not self.h_swap else self.list_of_winner.append("h2")
-                # Todo: need to create a bunch of variable to collect sh*t for the avg_avg_avg_stuff
+                    self.list_of_winner.append("h2") if not self.h_swap else self.list_of_winner.append("h1")
+
+                # avg stuff
                 gameTraceOpt.endGameTrace(self.f, isGameEnd, self.total_eval_time, self.total_eval_count,
-                                          self.avg_depth_of_nodes, self.avg_ard_list, self.move_count)
+                                              self.avg_depth_of_nodes, self.avg_ard_list, self.move_count)
+
+                # avg_avg_stuff
+                Game.total_total_eval_time += self.total_eval_time
+                Game.total_move += self.move_count
+                Game.total_total_eval_count += self.total_eval_count
+                for x in self.avg_ard_list:
+                    Game.avg_avg_ard_list.append(x)
+                print(Game.avg_avg_ard_list)
                 return
             # meta data initialization
             start = time.time()
@@ -506,79 +516,79 @@ def user_input_board_config():
 
     return n, s, b, b_coord, player1, player2, d1, d2, algo1, algo2, t
 
+def get_param_set(index):
+    # n, s, b, b_coord, player1, player2, d1, d2, algo1, algo2, t
+    params = [
+        (4, 3, 4, [[0, 0], [0, 3], [3, 0], [3, 3]], Game.AI, Game.AI, 6, 6, Game.MINIMAX, Game.MINIMAX, 5.0),
+        (4, 3, 4, [[0, 0], [0, 3], [3, 0], [3, 3]], Game.AI, Game.AI, 6, 6, Game.ALPHABETA, Game.ALPHABETA, 1.0),
+        (5, 4, 4, [[1, 1], [0, 2], [2, 0], [4, 3]], Game.AI, Game.AI, 2, 6, Game.ALPHABETA, Game.ALPHABETA, 1.0),
+        (5, 4, 4, [[1, 2], [0, 0], [4, 2], [1, 4]], Game.AI, Game.AI, 6, 6, Game.ALPHABETA, Game.ALPHABETA, 5.0),
+        (8, 5, 5, [[7, 4], [1, 3], [7, 5], [4, 5], [1, 2]], Game.AI, Game.AI, 2, 6, Game.ALPHABETA, Game.ALPHABETA, 1.0),
+        (8, 5, 5, [[4, 0], [5, 1], [3, 7], [1, 2], [2, 4]], Game.AI, Game.AI, 2, 6, Game.ALPHABETA, Game.ALPHABETA, 5.0),
+        (8, 5, 6, [[2, 3], [1, 3], [4, 0], [2, 2], [2, 5], [5, 4]], Game.AI, Game.AI, 6, 6, Game.ALPHABETA, Game.ALPHABETA, 1.0),
+        (8, 5, 6, [[1, 4], [1, 2], [3, 1], [0, 3], [3, 2], [4, 3]], Game.AI, Game.AI, 6, 6, Game.ALPHABETA, Game.ALPHABETA, 5.0)
+    ]
+
+    return params[index]
 
 def main():
-    # user input
-    # _n, _s, _b, _b_coord, _player1, _player2, _d1, _d2, _algo1, _algo2, _t = user_input_board_config()
+    _r = 5
+    for i in range(8):
+        # user input
+        _n, _s, _b, _b_coord, _player1, _player2, _d1, _d2, _algo1, _algo2, _t = get_param_set(i)
+        _h_swap = False
 
-    # automatic
-    _n = 5
-    _s = 3
-    _b = 0
-    _b_coord = []
-    _d1 = 3
-    _d2 = 3
-    _t = 100
-    _r = 2
-    _algo1 = Game.MINIMAX
-    _algo2 = Game.ALPHABETA
-    _player1 = Game.AI
-    _player2 = Game.AI
-    _h_swap = False
+        # start writing
+        fileFormat = "gameTrace-{}{}{}{}.txt".format(_n, _b, _s, _t)
+        fWriter_gametrace = open(fileFormat, "w")
+        # 1. The parameters of the game: the values of n, b, s, t
+        fWriter_gametrace.write(
+            "Game parameters: [Size n = {}, Blocs b = {}, winSize s = {}, Overtime t = {}]\n".format(_n, _b, _s, _t))
+        # 2. The position of the blocs
+        fWriter_gametrace.write("Position of each blocs: {}\n\r".format(_b_coord))
+        # 3. player info
+        fWriter_gametrace.write("Player 1: {}, d={}, a={}, {}\n".format(_player1, _d1, _algo1, "h1"))
+        fWriter_gametrace.write("Player 2: {}, d={}, a={}, {}\n\r".format(_player2, _d2, _algo2, "h2"))
 
-    """single run"""
-    # start writing
-    fileFormat = "gameTrace-{}{}{}{}.txt".format(_n, _b, _s, _t)
-    fWriter = open(fileFormat, "w")
+        g = Game(n=_n, s=_s, b=_b, b_coord=_b_coord, d1=_d1, d2=_d2, t=_t, f=fWriter_gametrace, h_swap=_h_swap)
+        # 4. initial config of board
+        fWriter_gametrace.write("4. Initial configuration of the board.{}\n".format(g.draw_board()))
 
-    # 1. The parameters of the game: the values of n, b, s, t
-    fWriter.write(
-        "Game parameters: [Size n = {}, Blocs b = {}, winSize s = {}, Overtime t = {}]\n".format(_n, _b, _s, _t))
-    # 2. The position of the blocs
-    fWriter.write("Position of each blocs: {}\n\r".format(_b_coord))
-    # 3. player info
-    fWriter.write("Player 1: {}, d={}, a={}, {}\n".format(_player1, _d1, _algo1, "h1"))
-    fWriter.write("Player 2: {}, d={}, a={}, {}\n\r".format(_player2, _d2, _algo2, "h2"))
+        """2 x r run"""
+        # writing
+        fileFormat = "scoredBoard.txt"
+        fWriter_scoreboard = open(fileFormat, "a")
 
-    g = Game(n=_n, s=_s, b=_b, b_coord=_b_coord, d1=_d1, d2=_d2, t=_t, f=fWriter, h_swap=_h_swap)
-    # 4. initial config of board
-    fWriter.write("4. Initial configuration of the board.{}\n".format(g.draw_board()))
-    g.play(algo1=_algo1, algo2=_algo2, player_x=_player1, player_o=_player2)
-    fWriter.close()
+        # 1. The parameters of the game: the values of n, b, s, t
+        fWriter_scoreboard.write(
+            "Game parameters: [Size n = {}, Blocs b = {}, winSize s = {}, Overtime t = {}]\n".format(_n, _b, _s, _t))
+        # 2. player info
+        fWriter_scoreboard.write("Player 1: d={}, a={}, {}\n".format(_d1, _algo1, "h1"))
+        fWriter_scoreboard.write("Player 2: d={}, a={}, {}\n\r".format(_d2, _algo2, "h2"))
+        # 3. The number of games played (the value of 2xr)
+        fWriter_scoreboard.write("The number of games played: {}\n\r".format(2 * _r))
+        # 4. The number and percentage of wins for heuristic el and for heuristic e2
+        g.list_of_winner = []
+        for i in range(0, _r):
+            g.play(algo1=_algo1, algo2=_algo2, player_x=_player1, player_o=_player2)
 
-    """2 x r run"""
-    # writing
-    fileFormat = "scoredBoard.txt"
-    fWriter = open(fileFormat, "w")
+        g.h_swap = not g.h_swap
+        for i in range(0, _r):
+            g.play(algo1=_algo1, algo2=_algo2, player_x=_player1, player_o=_player2)
+        winningStat = {x: g.list_of_winner.count(x) for x in sorted(set(g.list_of_winner))}
+        totalWinCount = len(g.list_of_winner)
+        h1Win = winningStat['h1'] if 'h1' in winningStat else 0
+        h2Win = winningStat['h2'] if 'h2' in winningStat else 0
+        fWriter_scoreboard.write("Total wins for heuristic e1: {}, ({}%) ({})\n".format(h1Win, 100*(h1Win / totalWinCount), 'simple'))
+        fWriter_scoreboard.write("Total wins for heuristic e2: {}, ({}%) ({})\n\r".format(h2Win,
+                                                                               100*(h2Win / totalWinCount), 'complicate'))
 
-    # 1. The parameters of the game: the values of n, b, s, t
-    fWriter.write(
-        "Game parameters: [Size n = {}, Blocs b = {}, winSize s = {}, Overtime t = {}]\n".format(_n, _b, _s, _t))
-    # 2. player info
-    fWriter.write("Player 1: d={}, a={}, {}\n".format(_d1, _algo1, "h1"))
-    fWriter.write("Player 2: d={}, a={}, {}\n\r".format(_d2, _algo2, "h2"))
-    # 3. The number of games played (the value of 2xr)
-    fWriter.write("The number of games played: {}\n\r".format(2 * _r))
-    # 4. The number and percentage of wins for heuristic el and for heuristic e2
-    g = Game(n=_n, s=_s, b=_b, b_coord=_b_coord, d1=_d1, d2=_d2, t=_t, f=fWriter, h_swap=_h_swap)
-    g.list_of_winner = []
-    for i in range(0, _r):
-        g.play(algo1=_algo1, algo2=_algo2, player_x=_player1, player_o=_player2)
-    for i in range(0, _r):
-        g.play(algo1=_algo1, algo2=_algo2, player_x=_player2, player_o=_player1)
-    winningStat = {x: g.list_of_winner.count(x) for x in sorted(set(g.list_of_winner))}
-    totalWinCount = len(g.list_of_winner)
-    h1Win = winningStat['h1'] if 'h1' in winningStat else 0
-    h2Win = winningStat['h2'] if 'h2' in winningStat else 0
-    fWriter.write("Total wins for heuristic e1: {}, ({}%) ({})\n".format(h1Win, 100*(h1Win / totalWinCount), 'simple'))
-    fWriter.write("Total wins for heuristic e2: {}, ({}%) ({})\n\r".format(h2Win,
-                                                                           100*(h2Win / totalWinCount), 'complicate'))
-
-    # 5. total game trace:
-    # note that every parameter was averaged over 2 x r
-    # gameTraceOpt.endGameTrace(self.f, isGameEnd, self.total_eval_time, self.total_eval_count,
-    #                                       self.avg_depth_of_nodes, self.avg_ard_list, self.move_count)
-
+        # 5. total game trace:
+        # note that every parameter was averaged over 2 x r
+        gameTraceOpt.scoreBoardOutput(fWriter_scoreboard, Game.total_total_eval_time, Game.total_total_eval_count,
+                                              Game.avg_avg_depth_of_nodes, Game.avg_avg_ard_list, Game.total_move, _r*2)
+        fWriter_gametrace.close()
+        fWriter_scoreboard.close()
 
 if __name__ == "__main__":
     main()
