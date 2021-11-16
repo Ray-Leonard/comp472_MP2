@@ -290,7 +290,6 @@ class Game:
         if depth == 0 or (self.t - elapsed_time) <= 0:
             self.eval_count += 1
             self.depth_of_nodes.append(current_depth)
-            # Fixme avg_depth_of_nodes is completely same as depth_of_nodes isn't it?
             self.avg_depth_of_nodes.append(current_depth)
             if not self.h_swap:
                 return Heuristics.h1(self) if self.player_turn == 'X' else Heuristics.h2(self), x, y, current_depth
@@ -355,10 +354,7 @@ class Game:
         self.total_eval_count = 0
         self.avg_depth_of_nodes = []
         self.avg_ard_list = []
-        # Num of heuristic evaluations
-        self.eval_count = 0
-        # depth of nodes
-        self.depth_of_nodes = []
+
 
 
         while True:
@@ -382,7 +378,10 @@ class Game:
             # meta data initialization
             start = time.time()
             self.timer_s = time.time()
-
+            # Num of heuristic evaluations
+            self.eval_count = 0
+            # depth of nodes
+            self.depth_of_nodes = []
             # run algo
             if self.player_turn == 'X':
                 if algo1 == Game.MINIMAX:
